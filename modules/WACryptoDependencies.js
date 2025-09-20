@@ -1,0 +1,1 @@
+["tweetnacl"],(function(a,b,c,d,e,f,g){"use strict";var h=self.crypto;function a(a){h=a;var b=65536;d("tweetnacl").setPRNG(function(c,d){var e,f=new Uint8Array(d);for(e=0;e<d;e+=b)a.getRandomValues(f.subarray(e,e+Math.min(d-e,b)));for(e=0;e<d;e++)c[e]=f[e];for(e=0;e<f.length;e++)f[e]=0})}function b(){return h}g.setCrypto=a;g.getCrypto=b}),98);
