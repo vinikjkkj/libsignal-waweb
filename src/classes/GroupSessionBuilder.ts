@@ -39,10 +39,7 @@ export class GroupSessionBuilder {
             if (st.senderChainKey && st.senderChainKey.seed) {
                 st = {
                     ...st,
-                    senderChainKey: {
-                        ...st.senderChainKey,
-                        seed: toUint8(st.senderChainKey.seed)
-                    }
+                    senderChainKey: { ...st.senderChainKey, seed: toUint8(st.senderChainKey.seed) }
                 }
             }
             if (Array.isArray(st.senderMessageKeys)) {
@@ -62,8 +59,8 @@ export class GroupSessionBuilder {
 
     async create(senderKeyName: any) {
         await bootstrap()
-        const GroupSession = await requireModule<any>('WASignalGroupSession')
         const GroupCipher = await requireModule<any>('WASignalGroupCipher')
+        const GroupSession = await requireModule<any>('WASignalGroupSession')
         const Keys = await requireModule<any>('WASignalKeys')
         const Other = await requireModule<any>('WASignalOther')
 
@@ -109,7 +106,7 @@ export class GroupSessionBuilder {
         let rec = await this.store.loadSenderKey(senderKeyName)
         if (!rec) rec = new SenderKeyRecord()
 
-        const internal = this._normalizeInternal(rec._state)
+        const internal = await this._normalizeInternal(rec._state)
         const updated = await GroupCipher.processSenderKeyDistributionMsg(
             distributionMsg.serialize(),
             internal

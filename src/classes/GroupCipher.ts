@@ -12,6 +12,56 @@ export class GroupCipher {
         this.senderKeyName = senderKeyName
     }
 
+    private async _normalizeInternal(s: any) {
+        const GroupSession = await requireModule<any>('WASignalGroupSession')
+        const arr = s && Array.isArray(s.senderKeyStates) ? s.senderKeyStates : []
+        const out = arr.map((st: any) => {
+            if (!st) return st
+            if (st.senderSigningKey) {
+                if (st.senderSigningKey.public) {
+                    let pub = toUint8(st.senderSigningKey.public)
+                    if (pub && pub.length === 32) {
+                        const ser = new Uint8Array(33)
+                        ser[0] = 0x05
+                        ser.set(pub, 1)
+                        pub = ser
+                    }
+                    st = { ...st, senderSigningKey: { ...st.senderSigningKey, public: pub } }
+                }
+                if (st.senderSigningKey.private) {
+                    st = {
+                        ...st,
+                        senderSigningKey: {
+                            ...st.senderSigningKey,
+                            private: toUint8(st.senderSigningKey.private)
+                        }
+                    }
+                }
+            }
+            if (st.senderChainKey && st.senderChainKey.seed) {
+                st = {
+                    ...st,
+                    senderChainKey: {
+                        ...st.senderChainKey,
+                        seed: toUint8(st.senderChainKey.seed)
+                    }
+                }
+            }
+            if (Array.isArray(st.senderMessageKeys)) {
+                st = {
+                    ...st,
+                    senderMessageKeys: st.senderMessageKeys.map((mk: any) =>
+                        mk && mk.seed ? { ...mk, seed: toUint8(mk.seed) } : mk
+                    )
+                }
+            }
+            if (st.senderKeyChainKey && st.senderSigningKeyPublic) return st
+            const parsed = GroupSession.parseSessionFromRecord({ senderKeyStates: [st] })
+            return parsed.senderKeyStates[0]
+        })
+        return { senderKeyStates: out }
+    }
+
     async encrypt(data: any): Promise<Uint8Array> {
         await bootstrap()
         const GroupCipher = await requireModule<any>('WASignalGroupCipher')
@@ -19,42 +69,7 @@ export class GroupCipher {
         const rec = await this.store.loadSenderKey(this.senderKeyName)
         if (!rec) throw new Error('No sender key state')
 
-        const normalizeInternal = (s: any) => {
-            const arr = s && Array.isArray(s.senderKeyStates) ? s.senderKeyStates : []
-            const out = arr.map((st: any) => {
-                if (!st) return st
-                if (st.senderSigningKey) {
-                    if (st.senderSigningKey.public) {
-                        let pub = toUint8(st.senderSigningKey.public)
-                        if (pub && pub.length === 32) {
-                            const ser = new Uint8Array(33)
-                            ser[0] = 0x05
-                            ser.set(pub, 1)
-                            pub = ser
-                        }
-                        st = { ...st, senderSigningKey: { ...st.senderSigningKey, public: pub } }
-                    }
-                    if (st.senderSigningKey.private) {
-                        st = {
-                            ...st,
-                            senderSigningKey: {
-                                ...st.senderSigningKey,
-                                private: toUint8(st.senderSigningKey.private)
-                            }
-                        }
-                    }
-                }
-                if (st.senderKeyChainKey && st.senderSigningKeyPublic) return st
-                const parsed = GroupSession.parseSessionFromRecord({ senderKeyStates: [st] })
-                return parsed.senderKeyStates[0]
-            })
-            return { senderKeyStates: out }
-        }
-
-        const internal = normalizeInternal(rec._state)
-        try {
-            console.dir({ internal, data }, { depth: null, colors: true, maxArrayLength: null })
-        } catch {}
+        const internal = await this._normalizeInternal(rec._state)
         const res = await GroupCipher.encryptSenderKeyMsgWithSession(internal, data)
         if (!res || !res.success) {
             const err = res && res.error ? res.error : 'unknown'
@@ -73,56 +88,7 @@ export class GroupCipher {
         const rec = await this.store.loadSenderKey(this.senderKeyName)
         if (!rec) throw new Error('No sender key state')
 
-        const normalizeInternal = (s: any) => {
-            const arr = s && Array.isArray(s.senderKeyStates) ? s.senderKeyStates : []
-            const out = arr.map((st: any) => {
-                if (!st) return st
-                if (st.senderSigningKey) {
-                    if (st.senderSigningKey.public) {
-                        let pub = toUint8(st.senderSigningKey.public)
-                        if (pub && pub.length === 32) {
-                            const ser = new Uint8Array(33)
-                            ser[0] = 0x05
-                            ser.set(pub, 1)
-                            pub = ser
-                        }
-                        st = { ...st, senderSigningKey: { ...st.senderSigningKey, public: pub } }
-                    }
-                    if (st.senderSigningKey.private) {
-                        st = {
-                            ...st,
-                            senderSigningKey: {
-                                ...st.senderSigningKey,
-                                private: toUint8(st.senderSigningKey.private)
-                            }
-                        }
-                    }
-                }
-                if (st.senderChainKey && st.senderChainKey.seed) {
-                    st = {
-                        ...st,
-                        senderChainKey: {
-                            ...st.senderChainKey,
-                            seed: toUint8(st.senderChainKey.seed)
-                        }
-                    }
-                }
-                if (Array.isArray(st.senderMessageKeys)) {
-                    st = {
-                        ...st,
-                        senderMessageKeys: st.senderMessageKeys.map((mk: any) =>
-                            mk && mk.seed ? { ...mk, seed: toUint8(mk.seed) } : mk
-                        )
-                    }
-                }
-                if (st.senderKeyChainKey && st.senderSigningKeyPublic) return st
-                const parsed = GroupSession.parseSessionFromRecord({ senderKeyStates: [st] })
-                return parsed.senderKeyStates[0]
-            })
-            return { senderKeyStates: out }
-        }
-
-        const internal = normalizeInternal(rec._state)
+        const internal = await this._normalizeInternal(rec._state)
         const msgBytes = ciphertext instanceof Uint8Array ? ciphertext : new Uint8Array(ciphertext)
         const des = GroupCipher.deserializeSenderKeyMsg(msgBytes)
         if (!des || !des.success) {

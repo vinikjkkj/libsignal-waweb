@@ -161,4 +161,4 @@ Outputs will be written to `dist/` with ESM `.js` files and `.d.ts` typings.
 
 ## License
 
-All rights reserved — please check with the author before using in production.
+MIT
