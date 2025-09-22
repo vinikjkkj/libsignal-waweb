@@ -1,7 +1,7 @@
-import { bootstrap, requireModule } from '../registry'
-import { SessionRecord } from './SessionRecord'
-import type { ISessionStore } from '../types'
-import { toRaw32, toUint8 } from '../utils'
+import { bootstrap, requireModule } from '../registry.js'
+import { SessionRecord } from './SessionRecord.js'
+import type { ISessionStore } from '../types.js'
+import { toRaw32, toUint8 } from '../utils.js'
 
 export class SessionBuilder {
     public store: ISessionStore

@@ -1,4 +1,4 @@
-import { requireModule, getSignalKeys, getSignalSignatures } from './registry'
+import { requireModule, getSignalKeys, getSignalSignatures } from './registry.js'
 
 export async function generateIdentity() {
     const Keys = await getSignalKeys()

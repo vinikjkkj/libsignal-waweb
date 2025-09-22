@@ -1,7 +1,7 @@
-import { bootstrap, requireModule } from '../registry'
-import { deepNormalizeBytes, toRaw32, toUint8 } from '../utils'
-import { SessionRecord } from './SessionRecord'
-import type { ISessionStore } from '../types'
+import { bootstrap, requireModule } from '../registry.js'
+import { deepNormalizeBytes, toRaw32, toUint8 } from '../utils.js'
+import { SessionRecord } from './SessionRecord.js'
+import type { ISessionStore } from '../types.js'
 
 export class SessionCipher {
     public store: ISessionStore

@@ -1,8 +1,8 @@
-import { bootstrap, requireModule } from '../registry'
-import { SenderKeyRecord } from './SenderKeyRecord'
-import { SenderKeyDistributionMessage } from './SenderKeyDistributionMessage'
-import type { ISenderKeyStore } from '../types'
-import { toUint8 } from '../utils'
+import { bootstrap, requireModule } from '../registry.js'
+import { SenderKeyRecord } from './SenderKeyRecord.js'
+import { SenderKeyDistributionMessage } from './SenderKeyDistributionMessage.js'
+import type { ISenderKeyStore } from '../types.js'
+import { toUint8 } from '../utils.js'
 
 export class GroupSessionBuilder {
     public store: ISenderKeyStore

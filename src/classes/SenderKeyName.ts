@@ -1,4 +1,4 @@
-import { ProtocolAddress } from './ProtocolAddress'
+import { ProtocolAddress } from './ProtocolAddress.js'
 
 export class SenderKeyName {
     public groupId: string
