@@ -81,7 +81,7 @@ export class GroupCipher {
         return outBytes
     }
 
-    async decrypt(ciphertext: any): Promise<Uint8Array | Buffer> {
+    async decrypt(ciphertext: any): Promise<Uint8Array> {
         await bootstrap()
         const GroupCipher = await requireModule<any>('WASignalGroupCipher')
         const GroupSession = await requireModule<any>('WASignalGroupSession')
@@ -105,8 +105,6 @@ export class GroupCipher {
         const serialized = GroupSession.serializeSession(updatedSession)
         await this.store.storeSenderKey(this.senderKeyName, new SenderKeyRecord(serialized))
         const out = plaintext as Uint8Array
-        return typeof Buffer !== 'undefined' && typeof Buffer.from === 'function'
-            ? Buffer.from(out)
-            : out
+        return out
     }
 }

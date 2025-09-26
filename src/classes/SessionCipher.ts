@@ -24,7 +24,7 @@ export class SessionCipher {
         return { type: out.type === 'pkmsg' ? 3 : 1, body: out.ciphertext }
     }
 
-    async decryptWhisperMessage(ciphertext: any): Promise<Uint8Array | Buffer> {
+    async decryptWhisperMessage(ciphertext: any): Promise<Uint8Array> {
         await bootstrap()
         const Cipher = await requireModule<any>('WASignalCipher')
         let rec = await this.store.loadSession(this.addr.toString())
@@ -47,12 +47,10 @@ export class SessionCipher {
         }
         const [updatedSession, out] = res.value
         await this.store.storeSession(this.addr.toString(), new SessionRecord(updatedSession))
-        return typeof Buffer !== 'undefined' && typeof Buffer.from === 'function'
-            ? Buffer.from(out)
-            : out
+        return out
     }
 
-    async decryptPreKeyWhisperMessage(ciphertext: any): Promise<Uint8Array | Buffer> {
+    async decryptPreKeyWhisperMessage(ciphertext: any): Promise<Uint8Array> {
         await bootstrap()
         const Cipher = await requireModule<any>('WASignalCipher')
         const Keys = await requireModule<any>('WASignalKeys')
@@ -157,9 +155,7 @@ export class SessionCipher {
                 } catch {}
             }
             const out = plaintext as Uint8Array
-            return typeof Buffer !== 'undefined' && typeof Buffer.from === 'function'
-                ? Buffer.from(out)
-                : out
+            return out
         }
         throw new Error('Invalid PreKeySignalMessage')
     }
