@@ -21,3 +21,4 @@ export { generateIdentity, generatePreKeys, generateSignedPreKey } from './helpe
 
 export type { ISenderKeyStore, ISessionStore, Bytes } from './types.js'
 export { deepNormalizeBytes, toUint8 } from './utils.js'
+export * from './curve.js'
