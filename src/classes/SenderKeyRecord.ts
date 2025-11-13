@@ -1,3 +1,5 @@
+const textDecoder = new TextDecoder()
+
 export class SenderKeyRecord {
     public _state: any
 
@@ -11,12 +13,9 @@ export class SenderKeyRecord {
 
     static deserialize(bufOrObj: any) {
         let obj = bufOrObj
-        if (
-            obj instanceof Uint8Array ||
-            (typeof Buffer !== 'undefined' && (Buffer as any).isBuffer && Buffer.isBuffer(obj))
-        ) {
+        if (obj instanceof Uint8Array) {
             try {
-                obj = JSON.parse(Buffer.from(obj).toString('utf-8'))
+                obj = JSON.parse(textDecoder.decode(obj))
             } catch {}
         }
         return new SenderKeyRecord(obj || { senderKeyStates: [] })
