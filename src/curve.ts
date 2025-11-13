@@ -39,7 +39,7 @@ export async function sign(privateKey: Uint8Array, buf: Uint8Array): Promise<Uin
     const Signatures: any = await getSignalSignatures()
     const identity = { privateKey: toRaw32(privateKey) }
     const serialized = generateSignalPubKey(buf)
-    const candidates = ['signSerializedPubKey', 'signPubKey', 'signKey', 'sign']
+    const candidates = ['signMsg', 'makeSignature', 'signSenderKeyMessage']
     for (const name of candidates) {
         if (typeof Signatures[name] === 'function') {
             const sig = await Signatures[name](identity, serialized)
@@ -59,7 +59,7 @@ export async function verify(
         const serialized = generateSignalPubKey(pubKey)
         const msgU8 = toUint8(message)
         const sigU8 = toUint8(signature)
-        const candidates = ['verifySignature', 'verifySignedKey', 'verify', 'verifyDetached']
+        const candidates = ['verifyMsgSignalVariant']
         for (const name of candidates) {
             if (typeof Signatures[name] === 'function') {
                 const ok = await Signatures[name](serialized, msgU8, sigU8)
